@@ -39,15 +39,21 @@ pipeline {
         stage('Deploy - Docker Run') {
             steps {
                 sh '''
-                echo "🚀 Building Docker image..."
-                docker build -t jenkins-devops-node .
-                echo "🚀 Running app container..."
-                docker run -d -p 3000:3000 --name devops-app jenkins-devops-node
-                echo "⌛ Waiting for app to start..."
-                sleep 5
-                echo "🩺 Checking app health..."
-                curl --fail http://localhost:3000/health || (echo "Health check failed" && exit 1)
-                '''
+        echo "🚀 Building Docker image..."
+        docker build -t jenkins-devops-node .
+
+        echo "🧹 Cleaning old container (if exists)..."
+        docker rm -f devops-app || true
+
+        echo "🚀 Running app container..."
+        docker run -d -p 3000:3000 --name devops-app jenkins-devops-node
+
+        echo "⌛ Waiting for app to start..."
+        sleep 5
+
+        echo "🩺 Checking app health..."
+        curl --fail http://localhost:3000/health || (echo "Health check failed" && exit 1)
+        '''
             }
         }
     }
