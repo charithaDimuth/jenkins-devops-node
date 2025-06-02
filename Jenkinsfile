@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'NodeJS 24'
+        nodejs 'NodeJS 18' // You must define this in Jenkins Tools config
     }
 
     stages {
@@ -26,6 +26,14 @@ pipeline {
                     sh 'npm run test -- --coverage'
                     sh 'npx sonar-scanner -Dsonar.login=$SONAR_TOKEN'
                 }
+            }
+        }
+        stage('Security - Trivy') {
+            steps {
+                sh '''
+                    echo "🔒 Running Trivy scan on project directory..."
+                    trivy fs --exit-code 0 --severity HIGH,CRITICAL --format table .
+                '''
             }
         }
     }
